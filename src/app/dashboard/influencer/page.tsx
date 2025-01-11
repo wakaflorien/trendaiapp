@@ -104,14 +104,15 @@ const InfluencerPage = () => {
 
             {showCreateCampaign && (
                 <form noValidate autoComplete="off" className='flex flex-col gap-4 p-4 max-w-[500px] mx-auto w-full'>
-                    <header className='text-center font-semibold text-xl'>Signup</header>
+                    <header className='text-center font-semibold text-xl'>Submit Content</header>
+
                     <TextField
                         helperText={errors.link || ""}
                         error={!!errors.link}
                         label="Link"
                         variant="outlined"
                         type='text'
-                        name="name"
+                        name="link"
                         value={formData.link}
                         required
                         onChange={handleChange}

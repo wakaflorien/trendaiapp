@@ -192,19 +192,26 @@ const DashboardPage = () => {
                             onChange={handleChange}
                         />
 
-                        <DatePickerComponent
-                            formData={formData}
-                            setFormData={setFormData}
-                            fieldName="startDate"
-                        />
-                        <small className='text-[#d3302f]'>{errors.startDate}</small>
+                        <div className='flex gap-2'>
+                            <div className='flex flex-col'>
+                                <DatePickerComponent
+                                    formData={formData}
+                                    setFormData={setFormData}
+                                    fieldName="startDate"
+                                />
+                                <small className='text-[#d3302f]'>{errors.startDate}</small>
+                            </div>
+                            <div>
 
-                        <DatePickerComponent
-                            formData={formData}
-                            setFormData={setFormData}
-                            fieldName="endDate"
-                        />
-                        <small className='text-[#d3302f]'>{errors.endDate}</small>
+                                <DatePickerComponent
+                                    formData={formData}
+                                    setFormData={setFormData}
+                                    fieldName="endDate"
+                                />
+                                <small className='text-[#d3302f]'>{errors.endDate}</small>
+                            </div>
+                        </div>
+
 
                         <Button text="Save" type="button" className="bg-[#89e81d] rounded-md p-2 h-12" onClick={handleSubmit} />
                         <Button text="Clear" type="button" className="bg-white border  rounded-md p-2 h-12" onClick={handleClearForm} />
