@@ -71,6 +71,9 @@ export type CampaignComponentProps = {
   link: string;
   hasActions: boolean;
   handleShowCreateCampaign?: () => void;
+  id?: string;
+  status?: string;
+  setRefetch?: () => void;
 };
 
 export interface TabPanelProps {
@@ -81,24 +84,52 @@ export interface TabPanelProps {
 }
 
 export interface TableRows {
-  title: string;
-  description: string;
-  submissionDate: string;
+  social?: string;
+  content?: string;
+  createdAt?: string;
+  link?: string;
+  status: string;
   actions: React.ReactNode;
+  _id: string;
 }
 
 export type TableProps = {
   rows: TableRows[];
 };
 
-export type SocialMedia = "instagram" | "x";
+export type SocialMedia = "Instagram" | "Tiktok";
 
 export interface ContentFormData {
   link: string;
-  socialMedia: SocialMedia;
+  social: SocialMedia;
 }
 
 export interface ContentFormValidationErrors {
   link?: string;
-  socialMedia?: string;
+  social?: string;
 }
+
+export interface CampaignFetchData {
+  _id: string;
+  title: string;
+  start_date: string;
+  end_date: string;
+  image: string;
+  desc: string;
+  status: string;
+  setRefetch?:() => void;
+}
+
+export type campaignTypes = {
+  _id: string;
+  start_date: string;
+  end_date: string;
+  image: string;
+  desc: string;
+  title: string;
+};
+
+export type influencerTypes = {
+  _id?: string;
+  email:string;
+};

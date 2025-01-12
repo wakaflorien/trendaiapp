@@ -1,29 +1,46 @@
 "use client";
 import React from "react";
-import { ContentFormData, ContentFormValidationErrors, SocialMedia } from "@/@types/global";
-import { MenuItem, TextField } from "@mui/material";
+import { CampaignFetchData, ContentFormData, ContentFormValidationErrors, SocialMedia } from "@/@types/global";
+import { IconButton, MenuItem, Snackbar, SnackbarCloseReason, TextField } from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
 import Button from "@/components/Button";
 import CampaignComponent from "@/components/Campaign";
+import { State } from "@/app/register/page";
+
+const env = process.env.NEXT_PUBLIC_TRENDAI_API
 
 const socialMedias = [
     {
-        value: 'instagram',
+        value: 'Instagram',
         label: 'Instagram'
     },
     {
-        value: 'x',
-        label: 'X'
+        value: 'Tiktok',
+        label: 'Tiktok'
     },
 
 ]
 const InfluencerPage = () => {
     const [showCreateCampaign, setShowCreateCampaign] = React.useState(false);
+    const [campaigns, setCampaigns] = React.useState([]);
+
+    const [state, setState] = React.useState<State>({
+        open: false,
+        vertical: "top",
+        horizontal: "center",
+    });
+
+    const [message, setmessage] = React.useState("");
+
+    const { open, vertical, horizontal } = state;
+
+    const [reload, setReload] = React.useState(true);
 
     const handleShowCreateCampaign = () => setShowCreateCampaign(!showCreateCampaign);
 
     const [formData, setFormData] = React.useState<ContentFormData>({
         link: '',
-        socialMedia: '' as SocialMedia,
+        social: '' as SocialMedia,
     });
     const [errors, setErrors] = React.useState<ContentFormValidationErrors>({});
 
@@ -45,60 +62,132 @@ const InfluencerPage = () => {
 
 
 
-        if (!formData.socialMedia) {
-            newErrors.socialMedia = 'Please select a user type';
+        if (!formData.social) {
+            newErrors.social = 'Please select a user type';
         }
 
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
 
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
+
+        const token = localStorage.getItem("jwt_token");
 
         if (validateForm()) {
-            console.log('Form is valid', formData);
             // Proceed with form submission
-        } else {
-            console.log('Form has errors', errors);
+
+            const response = await fetch(`${env}/influencer`, {
+                method: "POST",
+                headers: { 
+                    Authorization: `Bearer ${token}`,
+                    "Content-Type": "application/json"
+                 },
+                body: JSON.stringify(formData),
+            });
+            const data = await response.json();
+
+            if (!response.ok) {
+                setState({ ...state, open: true });
+                setmessage(data.message);
+            } else {
+                handleClearForm()
+            }
+
         }
     };
 
     const handleClearForm = () => {
         setFormData({
             link: '',
-            socialMedia: '' as SocialMedia,
+            social: '' as SocialMedia,
         });
         setErrors({});
         handleShowCreateCampaign();
     };
 
+    React.useEffect(() => {
+        const token: string | null = localStorage.getItem("jwt_token");
+        fetchData(token);
+    }, [reload]);
+
+    const fetchData = async (token: string | null) => {
+        const campaign_api = `${env}/campaign/influencer`;
+        const response = await fetch(campaign_api, {
+            method: "GET",
+            headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json",
+            },
+        });
+        const data = await response.json();
+        if (response.ok) {
+            setCampaigns(data);
+            setReload(false)
+        }
+    };
+
+    const handleClose = (
+        event: React.SyntheticEvent | Event,
+        reason?: SnackbarCloseReason
+    ) => {
+        if (reason === "clickaway") {
+            return;
+        }
+
+        setState({ ...state, open: false });
+    };
+
+    const setRefetch = async () => {
+        return setReload(true);
+    }
+
+    const action = (
+        <React.Fragment>
+            <IconButton
+                size="small"
+                aria-label="close"
+                color="inherit"
+                onClick={handleClose}
+            >
+                <CloseIcon fontSize="small" />
+            </IconButton>
+        </React.Fragment>
+    );
+
     return (
         <div className='flex w-5/6 flex-col gap-8 items-center justify-center'>
+
+            <Snackbar
+                anchorOrigin={{ vertical, horizontal }}
+                open={open}
+                autoHideDuration={6000}
+                onClose={handleClose}
+                message={message}
+                action={action}
+                key={vertical + horizontal}
+            />
+
             <header className="text-center font-semibold">Campaigns</header>
 
             {!showCreateCampaign && (<div className="flex w-full flex-col gap-8 items-center justify-center">
 
-                <CampaignComponent
-                    title='compaign [xxxx]'
-                    description='Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sedpulvinar, nunc nec ultricies.'
-                    startDate="2025/08/09"
-                    endDate="2025/08/09"
-                    image="./../globe.svg"
-                    link={`/dashboard/brand/${"compaign [xxxx]"}`}
-                    hasActions={true}
-                    handleShowCreateCampaign={handleShowCreateCampaign}
-                />
-
-                <CampaignComponent
-                    title='compaign [yyyy]'
-                    description='Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sedpulvinar, nunc nec ultricies.'
-                    startDate="2025/08/09"
-                    endDate="2025/08/09"
-                    image="./../file.svg"
-                    link={`/dashboard/brand/${"compaign [yyyy]"}`}
-                    hasActions={true}
-                    handleShowCreateCampaign={handleShowCreateCampaign}
-                />
+                {campaigns && campaigns.map((c: CampaignFetchData) => (
+                    <CampaignComponent
+                        title={c.title}
+                        description={c.desc}
+                        startDate={c.start_date}
+                        endDate={c.end_date}
+                        image={c.image}
+                        link={`/dashboard/brand/${c._id}`}
+                        hasActions={true}
+                        key={c._id}
+                        handleShowCreateCampaign={handleShowCreateCampaign}
+                        id={c._id}
+                        status={c.status}
+                        setRefetch={setRefetch}
+                    />
+                ))}
 
             </div>)}
 
@@ -119,13 +208,13 @@ const InfluencerPage = () => {
                     />
 
                     <TextField
-                        helperText={errors.socialMedia || ""}
-                        error={!!errors.socialMedia}
+                        helperText={errors.social || ""}
+                        error={!!errors.social}
                         label="Social Media"
                         variant='outlined'
                         select
-                        name="socialMedia"
-                        value={formData.socialMedia}
+                        name="social"
+                        value={formData.social}
                         onChange={handleChange}
                     >
                         {socialMedias.map((option) => (

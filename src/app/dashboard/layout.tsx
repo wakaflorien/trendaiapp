@@ -2,6 +2,8 @@
 import Navbar from "@/components/Nav";
 import React, { useEffect } from "react";
 
+const env = process.env.NEXT_PUBLIC_TRENDAI_API
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -10,12 +12,12 @@ export default function RootLayout({
   const [profile, setprofile] = React.useState({ name: "", type: "" });
 
   useEffect(() => {
-    const token: any = localStorage.getItem("jwt_token");
+    const token: string | null = localStorage.getItem("jwt_token");
     fetchData(token);
-  }, []);
+  });
 
-  const fetchData = async (token: string) => {
-    const profile_api = `http://localhost:3000/auth/profile`;
+  const fetchData = async (token: string | null) => {
+    const profile_api = `${env}/auth/profile`;
     const response = await fetch(profile_api, {
       method: "GET",
       headers: {

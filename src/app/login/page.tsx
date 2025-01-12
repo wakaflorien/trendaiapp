@@ -19,6 +19,8 @@ import CloseIcon from "@mui/icons-material/Close";
 import { handleToken } from "@/utils/auth";
 import { State } from "../register/page";
 
+const env = process.env.NEXT_PUBLIC_TRENDAI_API
+
 const handleMouseDownPassword = (
   event: React.MouseEvent<HTMLButtonElement>
 ) => {
@@ -29,6 +31,7 @@ const handleMouseUpPassword = (event: React.MouseEvent<HTMLButtonElement>) => {
   event.preventDefault();
 };
 const LoginPage = () => {
+  
   const [state, setState] = React.useState<State>({
     open: false,
     vertical: "top",
@@ -102,7 +105,7 @@ const LoginPage = () => {
 
   const handleSubmit = async () => {
     if (validateForm()) {
-      const login_api = `http://localhost:3000/auth/login`;
+      const login_api = `${env}/auth/login`;
 
       const response = await fetch(login_api, {
         method: "POST",

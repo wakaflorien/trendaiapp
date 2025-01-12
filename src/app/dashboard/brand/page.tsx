@@ -15,13 +15,17 @@ import CloseIcon from "@mui/icons-material/Close";
 import Button from "@/components/Button";
 import DatePickerComponent from "@/components/DatePicker";
 import {
+  CampaignFetchData,
   CampaignFormData,
-  CampaignFormProps,
   CampaignValidationErrors,
 } from "@/@types/global";
 import CampaignComponent from "@/components/Campaign";
 import { useEffect } from "react";
 import { State } from "@/app/register/page";
+import SyncIcon from '@mui/icons-material/Sync';
+
+
+const env = process.env.NEXT_PUBLIC_TRENDAI_API
 
 const VisuallyHiddenInput = styled("input")({
   clip: "rect(0 0 0 0)",
@@ -51,7 +55,7 @@ const DashboardPage = () => {
   const { open, vertical, horizontal } = state;
 
   useEffect(() => {
-    const token: any = localStorage.getItem("jwt_token");
+    const token: string | null = localStorage.getItem("jwt_token");
     fetchData(token);
   }, [reload]);
 
@@ -130,50 +134,6 @@ const DashboardPage = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  // const handleSubmit = async () => {
-  //   // Create FormData object
-  //   const payload = new FormData();
-
-  //   // payload.append("file", formData.image); // Append the file
-  //   payload.append(
-  //     "data",
-  //     JSON.stringify({
-  //       name: "test3",
-  //       desc: "here we go encore",
-  //       status: "Close",
-  //       start_date: "2024-01-10",
-  //       end_date: "2024-07-30",
-  //     })
-  //   );
-
-  //   console.log("-----------");
-
-  //   console.log(payload);
-
-  //   if (validateForm()) {
-  //     const add_campaign_api = `http://localhost:3000/campaign`;
-  //     const token: any = localStorage.getItem("jwt_token");
-
-  //     const response = await fetch(add_campaign_api, {
-  //       method: "POST",
-  //       headers: {
-  //         Authorization: `Bearer ${token}`,
-  //         "Content-Type": "application/json",
-  //       },
-  //       body: payload,
-  //     });
-  //     const data = await response.json();
-
-  //     if (!response.ok) {
-  //       setState({ ...state, open: true });
-  //       setmessage(data.message);
-  //     } else {
-  //     }
-  //   } else {
-  //     console.log("Form has errors", errors);
-  //   }
-  // };
-
   const handleSubmit = async () => {
     // Create a FormData object to handle file uploads
     const formDataObj = new FormData();
@@ -185,7 +145,7 @@ const DashboardPage = () => {
 
     // Append other form data as JSON string
     const campaignData = {
-      name: formData.title,
+      title: formData.title,
       desc: formData.description,
       status: "Pending",
       start_date: formData.startDate,
@@ -195,7 +155,7 @@ const DashboardPage = () => {
 
     if (validateForm()) {
       try {
-        const add_campaign_api = `http://localhost:3000/campaign`;
+        const add_campaign_api = `${env}/campaign`;
         const token = localStorage.getItem("jwt_token");
 
         const response = await fetch(add_campaign_api, {
@@ -262,8 +222,8 @@ const DashboardPage = () => {
     </React.Fragment>
   );
 
-  const fetchData = async (token: string) => {
-    const campaign_api = `http://localhost:3000/campaign/brand`;
+  const fetchData = async (token: string | null) => {
+    const campaign_api = `${env}/campaign/brand`;
     const response = await fetch(campaign_api, {
       method: "GET",
       headers: {
@@ -277,6 +237,12 @@ const DashboardPage = () => {
       setreload(false);
     }
   };
+
+  if(reload){
+    return (
+      <SyncIcon fontSize="large" className="animate-spin" />
+    )
+  }
 
   return (
     <div className="w-full flex items-center justify-center flex-col gap-8">
@@ -294,9 +260,9 @@ const DashboardPage = () => {
 
       {!showCreateCampaign && (
         <div className="flex w-full flex-col gap-8 items-center justify-center">
-          {campaign.map((c: any, index) => (
+          {campaign.map((c: CampaignFetchData) => (
             <CampaignComponent
-              title={`Campaign ${index + 1}`}
+              title={c.title ?? "No campaign title rn"}
               description={c.desc}
               startDate={c.start_date}
               endDate={c.end_date}

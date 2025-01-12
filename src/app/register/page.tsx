@@ -24,6 +24,9 @@ import CloseIcon from "@mui/icons-material/Close";
 import { validateEmail, validatePassword } from "@/utils/validation";
 import { handleToken } from "@/utils/auth";
 
+const env = process.env.NEXT_PUBLIC_TRENDAI_API
+
+
 export interface State extends SnackbarOrigin {
   open: boolean;
 }
@@ -49,6 +52,7 @@ const handleMouseUpPassword = (event: React.MouseEvent<HTMLButtonElement>) => {
   event.preventDefault();
 };
 const RegisterPage = () => {
+
   const [state, setState] = React.useState<State>({
     open: false,
     vertical: "top",
@@ -142,7 +146,7 @@ const RegisterPage = () => {
 
   const handleSubmit = async () => {
     if (validateForm()) {
-      const register_api = `http://localhost:3000/auth/signup`;
+      const register_api = `${env}/auth/signup`;
 
       const response = await fetch(register_api, {
         method: "POST",

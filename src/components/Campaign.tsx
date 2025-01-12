@@ -4,6 +4,9 @@ import { CampaignComponentProps } from "@/@types/global";
 import Image from "next/image";
 import { Typography } from "@mui/material";
 import Link from "next/link";
+import dayjs from "dayjs";
+
+const env = process.env.NEXT_PUBLIC_TRENDAI_API
 
 const CampaignComponent: React.FC<CampaignComponentProps> = ({
   title,
@@ -14,7 +17,55 @@ const CampaignComponent: React.FC<CampaignComponentProps> = ({
   link,
   hasActions,
   handleShowCreateCampaign,
+  status,
+  id,
+  setRefetch
 }) => {
+
+
+  const [formData, setFormData] = React.useState({
+    email: ""
+  })
+
+  React.useEffect(() => {
+    const token: string | null = localStorage.getItem("jwt_token");
+    fetchData(token);
+  }, []);
+
+  const fetchData = async (token: string | null) => {
+    const profile_api = `${env}/auth/profile`;
+    const response = await fetch(profile_api, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
+    const data = await response.json();
+    if (response.ok) {
+      setFormData({  email: data.email });
+    }
+  };
+
+  const handleJoin = async () => {
+
+    const token = localStorage.getItem("jwt_token");
+
+    const response = await fetch(`${env}/campaign/join/${id}`, {
+      method: "PUT",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(formData),
+    });
+    const data = await response.json();
+    console.log("data", data)
+
+    if (response.ok && setRefetch) {
+      setRefetch();
+    }
+  };
   return (
     <div className="flex flex-col gap-4 p-2 border rounded-md w-5/6">
       <div className="flex gap-8">
@@ -22,8 +73,8 @@ const CampaignComponent: React.FC<CampaignComponentProps> = ({
           aria-hidden
           src={image}
           alt="Globe icon"
-          width={400}
-          height={100}
+          width={200}
+          height={200}
           priority
         />
         <div className="flex flex-col gap-8">
@@ -34,17 +85,18 @@ const CampaignComponent: React.FC<CampaignComponentProps> = ({
                 variant="subtitle1"
                 className="px-2 border border-[#89e81d] rounded-md"
               >
-                Started date: {startDate}
+                Started date: {dayjs(startDate).format("YYYY-MM-DD")}
               </Typography>
               <Typography
                 variant="subtitle1"
                 className="px-2 border border-[#89e81d] rounded-md"
               >
-                End date: {endDate}
+                End date: {dayjs(endDate).format("YYYY-MM-DD")}
               </Typography>
             </div>
           </header>
           <p>{description}</p>
+
           {!hasActions && (
             <Link href={link}>
               <Typography
@@ -55,33 +107,24 @@ const CampaignComponent: React.FC<CampaignComponentProps> = ({
               </Typography>
             </Link>
           )}
+
           {hasActions && (
             <div className="flex gap-4">
-              <button
+              {status && status.toLowerCase() === "pending" && (<button
                 type="button"
                 className="bg-[#c4c4c4] rounded-full text-sm py-2 px-4"
+                onClick={handleJoin}
               >
                 Join Campaign
-              </button>
-              <button
-                type="button"
-                className="bg-[#89e81d] rounded-full text-sm py-2 px-4"
-              >
-                Approved
-              </button>
-              <button
-                type="button"
-                className="text-white bg-red-500 rounded-full text-sm py-2 px-4"
-              >
-                Rejected
-              </button>
-              <button
+              </button>)}
+
+              {status && status.toLowerCase() === "approved" && (<button
                 type="button"
                 className="bg-white border rounded-full text-sm py-2 px-4"
                 onClick={handleShowCreateCampaign}
               >
                 Submit Content
-              </button>
+              </button>)}
             </div>
           )}
         </div>
