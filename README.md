@@ -3,7 +3,9 @@
 ## Description
 
 This is a frontend project for a platform enabling brands to promote products. Influencers can register and participate in brand campaigns. 
-[Documentation](https://nextjs.org/) 
+
+
+[NextJs Documentation](https://nextjs.org/) 
 
 
 ## Prerequesite
@@ -26,4 +28,4 @@ $ npm run build
 
 ## Main contributor
 
-- Author [Florien](https://www.linkedin.com/in/pierre-damien-murindangabo-cyuzuzo-709b53151/)
+- Author [Florien](https://www.linkedin.com/in/florien-niyongabo-7b7971142/)
